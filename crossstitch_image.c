@@ -4,10 +4,11 @@
 #include <gdk-pixbuf/gdk-pixbuf.h>
 #include "crossstitch_image.h"
 
+#define NUMBER_OF_COLOURS 64
+
 int crossstitch_image_create(char *filename) {
   GdkPixbuf *pixbuf = NULL;
   GError *error = NULL;
-  // display_file_info(filename);
 
   pixbuf = gdk_pixbuf_new_from_file_at_size(filename, 1000, 1000, &error);
   if (!pixbuf) {
@@ -34,12 +35,8 @@ static void adjust_colours(GdkPixbuf *pixbuf) {
 
   guchar *pixels = gdk_pixbuf_get_pixels(pixbuf);
 
-  // for (int i = 0 ; i < (300 * rowstride) ; i += number_of_channels) {
-  // int offset = (500 * rowstride);
   for (int i = 0 ; i < (height * rowstride) ; i += number_of_channels) {
     int *colour = new_colour(pixels[i], pixels[i + 1], pixels[i + 2]);
-    // printf("Starting colour: %i %i %i, ", pixels[i], pixels[i + 1], pixels[i + 2]);
-    // printf("Closest colour: %i %i %i\n", colour[0], colour[1], colour[2]);
     pixels[i]     = colour[0];   // Red
     pixels[i + 1] = colour[1];   // Green
     pixels[i + 2] = colour[2];   // Blue
@@ -49,25 +46,21 @@ static void adjust_colours(GdkPixbuf *pixbuf) {
 static int *new_colour(int r, int g, int b) {
   int *closest_colour;
   double closest_score = DBL_MAX;
-  // printf("Finding match for %i %i %i\n", r, g, b);
 
-  for (int i = 0; i < 27; ++i) {
+  for (int i = 0; i < NUMBER_OF_COLOURS; ++i) {
     int *colour = valid_colours()[i];
     int r_diff = difference(r, colour[0]);
     int g_diff = difference(g, colour[1]);
     int b_diff = difference(b, colour[2]);
 
     double score = sqrt((r_diff * r_diff) + (g_diff * g_diff) + (b_diff * b_diff));
-    // printf("Score: %lf - %i %i %i\n", score, colour[0], colour[1], colour[2]);
     if (score < closest_score) {
-      // printf("New closer colour %i %i %i with score %lf\n", colour[0], colour[1], colour[2], score);
       closest_score = score;
       closest_colour = colour;
     }
   }
 
   return closest_colour;
-  // return valid_colours()[1];
 }
 
 static int difference(int a, int b) {
@@ -77,29 +70,6 @@ static int difference(int a, int b) {
     return b - a;
   }
 }
-
-// static int (*valid_colours(void))[3] {
-//   static int colours[16][3] = {
-//     { 0, 255, 255 },
-//     { 0, 0, 0 },
-//     { 0, 0, 255 },
-//     { 255, 0, 255 },
-//     { 128, 128, 128 },
-//     { 0, 128, 0 },
-//     { 0, 255, 0 },
-//     { 128, 0, 0 },
-//     { 0, 0, 128 },
-//     { 128, 128, 0 },
-//     { 128, 0, 128 },
-//     { 255, 0, 0 },
-//     { 192, 192, 192 },
-//     { 0, 128, 128 },
-//     { 255, 255, 255 },
-//     { 255, 255, 0 },
-//   };
-
-//   return colours;
-// }
 
 static void display_file_info(char *filename) {
   GdkPixbufFormat *format;
@@ -116,62 +86,77 @@ static void display_file_info(char *filename) {
 /*
 Go through each pixel and find the closest official colour to it, then convert it that colour
 
-
 Distance between 2 points in 3d space
 d = ((x2 - x1)^2 + (y2 - y1)^2 + (z2 - z1)^2)^1/2
 sqrt of the sum of their squared differences
-
-
 */
-// COLOURS = [
-//   [0, 0, 0],
-//   [55, 55, 55],
-//   [128, 128, 128],
-//   [200, 200, 200],
-//   [255, 255, 255],
-// ]
-
-// def distance(pixel, colour)
-//   r = (pixel[0] - colour[0]) ** 2
-//   g = (pixel[1] - colour[1]) ** 2
-//   b = (pixel[2] - colour[2]) ** 2
-
-//   Math.sqrt(r + g + b)
-// end
-
-// COLOURS.min_by { |colour| distance([160, 170, 170], colour) }
-
 
 static int (*valid_colours(void))[3] {
-  static int colours[27][3] = {
-{ 0, 0, 0 },
-{ 0, 0, 127 },
-{ 0, 0, 254 },
-{ 0, 127, 0 },
-{ 0, 127, 127 },
-{ 0, 127, 254 },
-{ 0, 254, 0 },
-{ 0, 254, 127 },
-{ 0, 254, 254 },
-{ 127, 0, 0 },
-{ 127, 0, 127 },
-{ 127, 0, 254 },
-{ 127, 127, 0 },
-{ 127, 127, 127 },
-{ 127, 127, 254 },
-{ 127, 254, 0 },
-{ 127, 254, 127 },
-{ 127, 254, 254 },
-{ 254, 0, 0 },
-{ 254, 0, 127 },
-{ 254, 0, 254 },
-{ 254, 127, 0 },
-{ 254, 127, 127 },
-{ 254, 127, 254 },
-{ 254, 254, 0 },
-{ 254, 254, 127 },
-{ 254, 254, 254 }
-
+  static int colours[NUMBER_OF_COLOURS][3] = {
+    { 0, 0, 0 },
+    { 0, 0, 70 },
+    { 0, 0, 140 },
+    { 0, 0, 210 },
+    { 0, 70, 0 },
+    { 0, 70, 70 },
+    { 0, 70, 140 },
+    { 0, 70, 210 },
+    { 0, 140, 0 },
+    { 0, 140, 70 },
+    { 0, 140, 140 },
+    { 0, 140, 210 },
+    { 0, 210, 0 },
+    { 0, 210, 70 },
+    { 0, 210, 140 },
+    { 0, 210, 210 },
+    { 70, 0, 0 },
+    { 70, 0, 70 },
+    { 70, 0, 140 },
+    { 70, 0, 210 },
+    { 70, 70, 0 },
+    { 70, 70, 70 },
+    { 70, 70, 140 },
+    { 70, 70, 210 },
+    { 70, 140, 0 },
+    { 70, 140, 70 },
+    { 70, 140, 140 },
+    { 70, 140, 210 },
+    { 70, 210, 0 },
+    { 70, 210, 70 },
+    { 70, 210, 140 },
+    { 70, 210, 210 },
+    { 140, 0, 0 },
+    { 140, 0, 70 },
+    { 140, 0, 140 },
+    { 140, 0, 210 },
+    { 140, 70, 0 },
+    { 140, 70, 70 },
+    { 140, 70, 140 },
+    { 140, 70, 210 },
+    { 140, 140, 0 },
+    { 140, 140, 70 },
+    { 140, 140, 140 },
+    { 140, 140, 210 },
+    { 140, 210, 0 },
+    { 140, 210, 70 },
+    { 140, 210, 140 },
+    { 140, 210, 210 },
+    { 210, 0, 0 },
+    { 210, 0, 70 },
+    { 210, 0, 140 },
+    { 210, 0, 210 },
+    { 210, 70, 0 },
+    { 210, 70, 70 },
+    { 210, 70, 140 },
+    { 210, 70, 210 },
+    { 210, 140, 0 },
+    { 210, 140, 70 },
+    { 210, 140, 140 },
+    { 210, 140, 210 },
+    { 210, 210, 0 },
+    { 210, 210, 70 },
+    { 210, 210, 140 },
+    { 210, 210, 210 }
   };
   return colours;
 }
