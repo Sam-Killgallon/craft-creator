@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 # Generate some colour mappings
 range = (0..255).step(70)
 
